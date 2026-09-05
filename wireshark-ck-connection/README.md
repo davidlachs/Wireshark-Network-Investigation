@@ -1,8 +1,8 @@
-# Case 01 — From DNS Resolution to Decrypted HTTPS Traffic
+# From DNS Resolution to Decrypted HTTPS Traffic
 
 ## Overview
 
-This investigation follows a normal web connection to `consolekings.com` from the first DNS lookup through TCP connection setup and TLS-encrypted HTTPS traffic.
+This investigation follows a normal web connection to `consolekings.com` (a popular competitive gaming website) from the first DNS lookup through TCP connection setup and TLS-encrypted HTTPS traffic.
 
 I used Wireshark to isolate the website's traffic, identify the TCP three-way handshake, inspect the TLS handshake, and then perform a second controlled capture in which I supplied Firefox TLS session secrets to Wireshark. That allowed me to see the HTTP/2 request and response that were normally hidden inside TLS encryption.
 
