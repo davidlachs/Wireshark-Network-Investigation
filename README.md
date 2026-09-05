@@ -1,4 +1,4 @@
-# Case 01 — From DNS Resolution to Decrypted HTTPS Traffic
+# From DNS Resolution to Decrypted HTTPS Traffic
 
 ## Overview
 
