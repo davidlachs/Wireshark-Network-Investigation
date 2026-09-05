@@ -6,7 +6,7 @@ This investigation follows a normal web connection to `consolekings.com` (a popu
 
 I used Wireshark to isolate the website's traffic, identify the TCP three-way handshake, inspect the TLS handshake, and then perform a second controlled capture in which I supplied Firefox TLS session secrets to Wireshark. That allowed me to see the HTTP/2 request and response that were normally hidden inside TLS encryption.
 
-**Why this matters:** Security analysts often begin with a large packet capture and must narrow it to the specific host, connection, and protocol activity relevant to an investigation.
+**Relevance:** Security analysts often begin with a large packet capture and must narrow it to the specific host, connection, and protocol activity relevant to an investigation.
 
 ---
 
@@ -110,7 +110,7 @@ The connection began with:
 192.168.1.95:55772  -> 216.150.1.1:443   ACK
 ```
 
-This is the TCP three-way handshake:
+This is the infamous TCP three-way handshake:
 
 ```text
 Client                         Server
@@ -124,15 +124,7 @@ ACK -------------------------->
 
 The client used temporary port `55772`, while the server used port `443`, the standard port for HTTPS.
 
-![TCP handshake and TLS connection](screenshots/02-tcp-three-way-handshake-and-tls.png)
-
-### Private addressing and NAT
-
-Wireshark was capturing traffic directly on my laptop, so it showed the laptop's private IPv4 address, `192.168.1.95`.
-
-If my network gateway performs Network Address Translation (NAT), that translation happens after the packet leaves the laptop. A capture taken on the laptop therefore sees the packet before the gateway replaces the private source address with a public-facing address.
-
-I did not capture traffic on the WAN side of the gateway, so the NAT translation itself was not directly observed in this lab.
+![TCP handshake and TLS connection](screenshots/02-tcp-and-tls-connection.png)
 
 ### Security relevance
 
@@ -191,7 +183,7 @@ The capture showed readable HTTP/2 request headers such as:
 
 ![Decrypted HTTP/2 request headers](screenshots/03-decrypted-http2-request-headers.png)
 
-This demonstrated that the apparent "garbled" data in a raw TLS stream was not ordinary plaintext. Once TLS was decrypted, Wireshark could interpret the underlying binary HTTP/2 frames and reconstruct their header fields.
+This demonstrated that the apparent "garbled" data found in raw TLS streams is not ordinary plaintext. Once TLS was decrypted, Wireshark could interpret the underlying binary HTTP/2 frames and reconstruct their header fields.
 
 ---
 
@@ -258,7 +250,7 @@ The later connection used `216.150.1.193` rather than the `216.150.1.1` address 
 
 ## Security Takeaways
 
-This lab reinforced an important distinction between **network metadata** and **application content**.
+This lab reinforced an important distinction between network metadata and application content.
 
 Even when HTTPS encrypts the application payload, an analyst may still be able to observe connection endpoints, ports, timing, packet sizes, and some handshake information. Access to endpoint-generated TLS session secrets changes that visibility and can allow authorized troubleshooting or forensic analysis of the application traffic itself.
 
@@ -270,7 +262,6 @@ The exercise also demonstrated why packet analysis is largely an exercise in fil
 
 - This was a controlled analysis of normal traffic from one device, not an investigation of malicious activity.
 - DNS/TCP analysis and TLS-decryption analysis were performed in separate controlled captures.
-- NAT behavior was inferred from the capture point and network design; I did not capture packets on both sides of the gateway.
 - Cloud-hosted websites can use redirects and multiple edge addresses, so the IP addresses observed here should be treated as capture-specific rather than permanent.
 - I intentionally did not publish the raw PCAP or TLS key log because packet captures and session secrets can contain sensitive information.
 
@@ -289,18 +280,9 @@ Most importantly, the lab connected concepts I had previously learned separately
 ```text
 screenshots/
 ├── 01-dns-resolution.png
-├── 02-tcp-three-way-handshake-and-tls.png
+├── 02-tcp-and-tls-connection.png
 ├── 03-decrypted-http2-request-headers.png
 └── 04-decrypted-http2-response-200-ok.png
 ```
 
 Raw packet captures and TLS session-key files are intentionally excluded from the public repository.
-
----
-
-## References
-
-- Wireshark User's Guide
-- Wireshark TLS documentation
-- RFC 9113 — HTTP/2
-- Vercel domain and Anycast routing documentation
